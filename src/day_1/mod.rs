@@ -12,7 +12,7 @@ where
     Ok(BufReader::new(file).lines())
 }
 
-fn solution_1() {
+pub fn solution_1() {
     if let Ok(lines) = read_lines("input.txt") {
         let sum = lines.fold(0_u16, |acc, line| {
             let line = line.unwrap_or_else(|_| String::new());
