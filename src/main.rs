@@ -1,14 +1,12 @@
 use std::io::{self, Write};
 
-use crate::day_1::solution_1;
+use crate::day_1::{solution_1, solution_2};
 
 mod day_1;
 
 fn main() {
     match prompt("Select a challenge day: ") {
-        1 => {
-            select_challenge(solution_1, || {});
-        }
+        1 => select_challenge(solution_1, solution_2),
         _ => panic!("Out of bounds day selected!"),
     };
 }
