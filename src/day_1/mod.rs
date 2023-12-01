@@ -55,13 +55,9 @@ where
                 .map(|&byte| byte as char)
                 .collect::<String>();
 
-            for &key in WORD_NUM_MAP
-                .get_or_init(init_num_map)
-                .keys()
-                .filter(|k| k.len() <= byte_queue.len())
-            {
+            for (&key, &val) in WORD_NUM_MAP.get_or_init(init_num_map) {
                 if word.contains(key) {
-                    return Break(*WORD_NUM_MAP.get_or_init(init_num_map).get(key).unwrap());
+                    return Break(val);
                 }
             }
 
