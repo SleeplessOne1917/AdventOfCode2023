@@ -1,11 +1,10 @@
 use std::{
     cell::OnceCell,
     collections::{HashMap, VecDeque},
-    fs::File,
-    io::{self, BufRead, BufReader, Lines},
     ops::ControlFlow::{Break, Continue},
-    path::Path,
 };
+
+use crate::utils::read_lines;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum NumType {
@@ -17,14 +16,6 @@ enum NumType {
 enum FromDirection {
     Left,
     Right,
-}
-
-fn read_lines<P>(filename: P) -> io::Result<Lines<BufReader<File>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
-    Ok(BufReader::new(file).lines())
 }
 
 const WORD_NUM_MAP: OnceCell<HashMap<&'static str, u8>> = OnceCell::new();
@@ -49,7 +40,7 @@ fn get_digit<I>(mut bytes: I, num_type: NumType, from_direction: FromDirection) 
 where
     I: Iterator<Item = u8>,
 {
-    let cf = bytes.try_fold(VecDeque::new(), |mut byte_queue, byte| {
+    let digit = bytes.try_fold(VecDeque::new(), |mut byte_queue, byte| {
         if byte.is_ascii_digit() {
             Break(byte)
         } else if num_type == NumType::DigitOrWord {
@@ -88,7 +79,7 @@ where
         }
     });
 
-    if let Break(byte) = cf {
+    if let Break(byte) = digit {
         Some(byte)
     } else {
         None

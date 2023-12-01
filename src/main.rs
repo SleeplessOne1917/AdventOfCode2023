@@ -3,6 +3,7 @@ use std::io::{self, Write};
 use crate::day_1::{solution_1, solution_2};
 
 mod day_1;
+mod utils;
 
 fn main() {
     match prompt("Select a challenge day: ") {
