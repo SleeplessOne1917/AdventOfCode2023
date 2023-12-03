@@ -13,43 +13,44 @@ fn read_schematic() -> Vec<Vec<u8>> {
 
 pub fn solution_1() {
     let schematic = read_schematic();
-    let symbol_indices = schematic.iter().enumerate().flat_map(|(y, line)| {
-        line.iter().enumerate().filter_map(move |(x, c)| {
+    let symbol_coords_list = schematic.iter().enumerate().flat_map(|(row, line)| {
+        line.iter().enumerate().filter_map(move |(col, c)| {
             if !(c.is_ascii_digit() || *c == b'.') {
-                Some((y, x))
+                Some((row, col))
             } else {
                 None
             }
         })
     });
 
-    let mut checked_indices = HashSet::new();
+    let mut checked_coords_set = HashSet::new();
     let mut get_num = |coords: (usize, usize)| {
-        let (y, mut x) = coords;
+        let (row, mut col) = coords;
         let mut bytes = VecDeque::new();
 
-        while let Some(c) = schematic.get(y).and_then(|row| row.get(x)) {
-            if c.is_ascii_digit() && !checked_indices.contains(&(y, x)) {
+        while let Some(c) = schematic.get(row).and_then(|row| row.get(col)) {
+            if c.is_ascii_digit() && !checked_coords_set.contains(&(row, col)) {
                 bytes.push_front(*c);
-                checked_indices.insert((y, x));
-                x += 1;
+                checked_coords_set.insert((row, col));
+                col += 1;
             } else {
                 break;
             }
         }
 
-        x = coords.1.checked_sub(1).unwrap_or(coords.1);
+        col = coords.1.checked_sub(1).unwrap_or(coords.1);
 
-        while let Some(c) = schematic.get(y).and_then(|row| row.get(x)) {
-            if c.is_ascii_digit() && !checked_indices.contains(&(y, x)) {
+        while let Some(c) = schematic.get(row).and_then(|row| row.get(col)) {
+            if c.is_ascii_digit() && !checked_coords_set.contains(&(row, col)) {
                 bytes.push_back(*c);
-                checked_indices.insert((y, x));
-                x = x.saturating_sub(1);
+                checked_coords_set.insert((row, col));
+                col = col.saturating_sub(1);
             } else {
                 break;
             }
         }
 
+        // Digits were put in reverse order so powers of 10 multiplies them correctly
         bytes
             .iter()
             .enumerate()
@@ -59,30 +60,27 @@ pub fn solution_1() {
             .sum::<usize>()
     };
 
-    let sum = symbol_indices
-        .flat_map(|(y, x)| {
-            let mut nums = Vec::new();
-            for y1 in (y - 1)..=(y + 1) {
-                for x1 in (x - 1)..=(x + 1) {
-                    let num = get_num((y1, x1));
-                    if num > 0 {
-                        println!("{num}");
-                    }
-                    nums.push(num);
+    let sum = symbol_coords_list
+        .fold(HashSet::new(), |mut nums, (row, col)| {
+            for row in (row - 1)..=(row + 1) {
+                for col in (col - 1)..=(col + 1) {
+                    nums.insert(get_num((row, col)));
                 }
             }
 
             nums
         })
+        .iter()
         .sum::<usize>();
 
+    // Create file to see which numbers got replaced
     let mut foo = String::new();
     for (y, line) in schematic.iter().enumerate() {
         let line = line
             .iter()
             .enumerate()
             .map(|(x, c)| {
-                (if checked_indices.contains(&(y, x)) {
+                (if checked_coords_set.contains(&(y, x)) {
                     b'x'
                 } else {
                     *c
