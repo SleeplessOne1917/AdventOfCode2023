@@ -60,6 +60,7 @@ pub fn solution_1() {
             .sum::<usize>()
     };
 
+    let mut num_str = String::new();
     let sum = symbol_coords_list
         .fold(HashSet::new(), |mut nums, (row, col)| {
             for row in (row - 1)..=(row + 1) {
@@ -71,25 +72,31 @@ pub fn solution_1() {
             nums
         })
         .iter()
+        .enumerate()
+        .map(|(i, num)| {
+            num_str.push_str(format!("{}{num}", if i == 0 { "" } else { "\n" }).as_str());
+            num
+        })
         .sum::<usize>();
+    std::fs::write("src/day_3/nums.txt", num_str).unwrap();
 
     // Create file to see which numbers got replaced
-    let mut foo = String::new();
-    for (y, line) in schematic.iter().enumerate() {
+    let mut out_str = String::new();
+    for (row, line) in schematic.iter().enumerate() {
         let line = line
             .iter()
             .enumerate()
-            .map(|(x, c)| {
-                (if checked_coords_set.contains(&(y, x)) {
+            .map(|(col, c)| {
+                (if checked_coords_set.contains(&(row, col)) {
                     b'x'
                 } else {
                     *c
                 }) as char
             })
             .collect::<String>();
-        foo.push_str(format!("{}{line}", if y == 0 { "" } else { "\n" }).as_str());
+        out_str.push_str(format!("{}{line}", if row == 0 { "" } else { "\n" }).as_str());
     }
-    std::fs::write("src/day_3/out.txt", foo).unwrap();
+    std::fs::write("src/day_3/out.txt", out_str).unwrap();
 
     println!("{sum}");
 }
