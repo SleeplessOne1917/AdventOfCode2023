@@ -38,13 +38,13 @@ pub fn solution_1() {
             }
         }
 
-        x = coords.1;
+        x = coords.1.checked_sub(1).unwrap_or(coords.1);
 
         while let Some(c) = schematic.get(y).and_then(|row| row.get(x)) {
             if c.is_ascii_digit() && !checked_indices.contains(&(y, x)) {
                 bytes.push_back(*c);
                 checked_indices.insert((y, x));
-                x -= 1;
+                x = x.saturating_sub(1);
             } else {
                 break;
             }
@@ -64,13 +64,34 @@ pub fn solution_1() {
             let mut nums = Vec::new();
             for y1 in (y - 1)..=(y + 1) {
                 for x1 in (x - 1)..=(x + 1) {
-                    nums.push(get_num((y1, x1)));
+                    let num = get_num((y1, x1));
+                    if num > 0 {
+                        println!("{num}");
+                    }
+                    nums.push(num);
                 }
             }
 
             nums
         })
         .sum::<usize>();
+
+    let mut foo = String::new();
+    for (y, line) in schematic.iter().enumerate() {
+        let line = line
+            .iter()
+            .enumerate()
+            .map(|(x, c)| {
+                (if checked_indices.contains(&(y, x)) {
+                    b'x'
+                } else {
+                    *c
+                }) as char
+            })
+            .collect::<String>();
+        foo.push_str(format!("{}{line}", if y == 0 { "" } else { "\n" }).as_str());
+    }
+    std::fs::write("src/day_3/out.txt", foo).unwrap();
 
     println!("{sum}");
 }
